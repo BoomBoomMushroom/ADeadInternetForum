@@ -1,0 +1,29 @@
+:root{
+    --main-bg-color: rgb(28, 28, 28);
+    --accent-color: rgb(78, 214, 5);
+}
+
+body{
+    background-color: var(--main-bg-color);
+    color: white;
+}
+
+.siteName{
+    color: var(--accent-color);
+}
+
+a,a:visited {
+    color: lightblue;
+}
+
+.comment{
+    margin-left: 2%;
+}
+
+.username{
+    color: var(--accent-color)
+}
+
+.content{
+    font-size: large;
+}

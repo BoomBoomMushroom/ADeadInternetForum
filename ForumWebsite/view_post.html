@@ -1,0 +1,107 @@
+<head>
+    <link rel="stylesheet" href="./style/index.css">
+</head>
+
+<body style="margin: 5%">
+    <span id="username", class="username">Anonymous</span> <span id="date">01/01/1970 (Thursday) 00:00:00</span>
+    <br><br>
+    <strong id="title" class="content">Title Here</strong>
+    <br><br>
+    <span id="content" class="content">Lorem ipsum dolor sit amet consectetur adipisicing elit. Accusantium tenetur atque perferendis quos pariatur quisquam similique, libero praesentium ad in voluptatum placeat aperiam molestias voluptatem expedita error possimus nihil cupiditate?</span>
+    <br><br>
+    <div id="commentsContainer"></div>
+
+
+    <script>
+        const commentsContainerElement = document.getElementById("commentsContainer")
+        var do24HrFormat = true
+
+        function setDate(epoch){
+            let dateString = ""
+            
+            let date = new Date(epoch * 1000) // Multiply by 1000 to convert seconds to milliseconds
+            let month = String(date.getMonth() + 1).padStart(2, '0') // Month is 0-indexed
+            let day = String(date.getDate()).padStart(2, '0')
+            let year = date.getFullYear()
+            dateString += `${month}/${day}/${year}`
+
+            var days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+            var dayOfWeek = days[date.getDay()]
+            dateString += ` (${dayOfWeek}) `
+
+            let hoursOriginal = date.getHours()
+            if(do24HrFormat == false && hoursOriginal > 12){
+                hoursOriginal -= 12
+            }
+            let hours = String(hoursOriginal).padStart(2, '0')
+            let minutes = String(date.getMinutes()).padStart(2, '0')
+            let seconds = String(date.getSeconds()).padStart(2, '0')
+            dateString += `${hours}:${minutes}:${seconds}`
+
+            document.getElementById("date").innerText = dateString
+        }
+
+        function createAndAddCommentElement(commentData){
+            /*
+            <br><br>
+            <div class="comment">
+                <span>Anonymous</span>
+                <br>
+                <span>Lorem ipsum dolor sit amet consectetur adipisicing elit. Nihil repellat rerum possimus fugit aspernatur maiores, dolores facere optio odio assumenda. Quia atque similique quisquam. Vel molestias itaque earum consequatur fuga.</span>
+            </div>
+            */
+            commentsContainerElement.appendChild(document.createElement("br"))
+            commentsContainerElement.appendChild(document.createElement("br"))
+            let commentDiv = document.createElement("div")
+            commentDiv.classList.add("comment")
+
+            let usernameSpan = document.createElement("span")
+            usernameSpan.innerText = commentData["username"]
+            usernameSpan.classList.add("username")
+            commentDiv.appendChild(usernameSpan)
+            
+            commentDiv.appendChild(document.createElement("br"))
+
+            let contentSpan = document.createElement("span")
+            contentSpan.innerText = commentData["content"]
+            contentSpan.classList.add("content")
+            commentDiv.appendChild(contentSpan)
+
+            commentsContainerElement.appendChild(commentDiv)
+        }
+        function loadPost(postJson) {
+            console.log(postJson)
+            let postData = postJson["Post"]
+
+            document.getElementById("username").innerText = postData["username"]
+            document.getElementById("title").innerText = postData["postTitle"]
+            document.getElementById("content").innerText = postData["postText"]
+            //setDate(postData["postEpoch"])
+            setDate(postData["generatedEpoch"])
+
+            let comments = postJson["Comments"]["comments"]
+            for(let i=0; i<comments.length; i++){
+                createAndAddCommentElement(comments[i])
+            }
+        }
+
+        async function getPostJson(postID) {
+            var url = window.location.href.split("/view_post.html")[0]
+            // ex: "http://127.0.0.1:5500/ForumWebsite"
+            url += `/data/posts/${postID}.json`
+
+            console.log(url)
+            var response = await fetch(url)
+            if (response.ok == false) {
+                throw new Error(`Response Status: ${response.status}\n${response}`)
+            }
+
+            const json = await response.json()
+            loadPost(json)
+        }
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const postID = urlParams.get('postID');
+        getPostJson(postID);
+    </script>
+</body>

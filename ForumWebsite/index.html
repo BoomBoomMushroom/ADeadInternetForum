@@ -1,0 +1,57 @@
+<head>
+    <link rel="stylesheet" href="./style/index.css">
+</head>
+<body>
+    <br>
+    <center>
+        <h1>Welcome to <span class="siteName">Crawl Space</span></h1>
+    </center>
+
+    <br><br>
+
+    <center id="RecentPosts">
+        <h2>Recent Posts</h2>
+    </center>
+
+    <script>
+        const RecentPostsElement = document.getElementById("RecentPosts")
+
+        function loadPosts(postsJson){
+            let urlStruct = window.location.href.split("/index.html")[0] + "/view_post.html"
+
+            // reverse because newer posts should be at the top
+            postsJson.reverse()
+
+            for(let i=0; i<postsJson.length; i++){
+                let post = postsJson[i]
+
+                var title = post["Title"]
+                var uuid = post["UUID"]
+
+                var postLink = document.createElement("a")
+                postLink.href = urlStruct + `?postID=${uuid}`
+                postLink.innerText = title
+
+                RecentPostsElement.appendChild(postLink)
+                RecentPostsElement.appendChild(document.createElement("br"))
+            }
+        }
+
+        async function getRecentPostsJson() {
+            var url = window.location.href.split("/index.html")[0]
+            // ex: "http://127.0.0.1:5500/ForumWebsite"
+            url += "/data/recent_posts.json"
+
+            var response = await fetch(url)
+            if (response.ok == false) {
+                throw new Error(`Response Status: ${response.status}\n${response}`)
+            }
+
+            var postsJson = await response.json()
+            console.log(postsJson)
+            loadPosts(postsJson)
+        }
+
+        getRecentPostsJson();
+    </script>
+</body>
